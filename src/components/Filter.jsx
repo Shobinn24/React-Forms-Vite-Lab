@@ -1,9 +1,15 @@
-import React from "react";
+import PropTypes from 'prop-types';
 
-function Filter({ onCategoryChange }) {
+function Filter({ search, onSearchChange, onCategoryChange }) {
   return (
     <div className="Filter">
-      <input type="text" name="search" placeholder="Search..." />
+      <input 
+        type="text" 
+        name="search" 
+        placeholder="Search..." 
+        value={search}
+        onChange={onSearchChange}
+      />
       <select name="filter" onChange={onCategoryChange}>
         <option value="All">Filter by category</option>
         <option value="Produce">Produce</option>
@@ -13,5 +19,11 @@ function Filter({ onCategoryChange }) {
     </div>
   );
 }
+
+Filter.propTypes = {
+  search: PropTypes.string.isRequired,
+  onSearchChange: PropTypes.func.isRequired,
+  onCategoryChange: PropTypes.func.isRequired,
+};
 
 export default Filter;

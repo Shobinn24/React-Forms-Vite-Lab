@@ -1,95 +1,307 @@
-# React Controlled Components Lab
+# Shopping List - React Controlled Components Lab
 
-## Learning Goals
+A fully-functional shopping list application built with React, demonstrating controlled components, form handling, state management, and filtering capabilities.
 
-- Implement a controlled form
+## Features
 
-## Introduction
+### Core Functionality
+- **Add Items** - Add new items to shopping list via controlled form
+- **Search Filter** - Real-time search filtering by item name
+- **Category Filter** - Filter items by category (Produce, Dairy, Dessert)
+- **Add to Cart** - Toggle items in/out of shopping cart
+- **Dark Mode** - Switch between light and dark themes
 
-In this lab, you'll write and use controlled components.
+### Technical Highlights
+- Controlled form inputs with React state
+- Multiple filtering strategies (search + category)
+- State lifting and prop drilling
+- Event handling and callbacks
+- UUID generation for unique IDs
+- Component composition
 
-## Controlled Components
+## Technologies Used
 
-Now that we know how to handle form elements in React and how to set up
-controlled components, it's time to put that knowledge to the test. This lab is
-fairly extensive, but you'll use many core React concepts here that will surface
-again and again. Time to get some practice in!
+- **React 18** - Component-based UI library
+- **React Hooks** - useState for state management
+- **Vite** - Fast build tool and dev server
+- **UUID** - Unique ID generation for items
+- **CSS** - Custom styling with dark mode support
 
-We'll continue adding new features to the Shopping List app using controlled
-components. Make sure to familiarize yourself with the code before diving into
-the deliverables! Completing these deliverables will also require understanding
-of all the previous topics from this section, including initializing state,
-passing data and callback functions as props, and working with events.
+## Installation
 
-## Deliverables
+### Prerequisites
+- Node.js (v14 or higher)
+- npm or yarn
 
-### Filter
+### Setup Instructions
 
-In the filter component, there is a new input field for searching our list.
-_When the user types in this field_, the list of items should be filtered so
-that only items with names that match the text are included.
+1. **Clone the repository:**
+```bash
+git clone https://github.com/shobinn24/react-forms-vite-lab.git
+cd react-forms-vite-lab
+```
 
-- Determine where you need to add state for this feature. What components need
-  to know about the search text?
+2. **Install dependencies:**
+```bash
+npm install
+```
 
-- Once you've determined which component should hold the state for this feature,
-  set up your initial state, and connect that state to the input field.
-  Remember, we're trying to make this input a _controlled_ input — so the
-  input's value should always be in sync with state.
+3. **Start development server:**
+```bash
+npm run dev
+```
 
-- After you've connected the input to state, you'll also need to find a way to
-  _set_ state when the input _changes_. To get the test passing, you'll need to
-  use a prop called `onSearchChange` as a callback.
+4. **Run tests:**
+```bash
+npm test
+```
 
-- Finally, after making those changes, you'll need to use that state value to
-  determine which items are being displayed on the page, similar to how the
-  category dropdown works.
+The app will open at `http://localhost:5173`
 
-**Note**: you may be asking yourself, why are we making this input controlled
-when the `<select>` element is not a controlled input? Well, the `<select>`
-input should probably be controlled as well! The tests don't require it, but
-feel free to update the `<select>` element to be a controlled element.
+## Project Structure
+```
+react-controlled-components-lab/
+├── src/
+│   ├── components/
+│   │   ├── App.jsx              # Main app component with items state
+│   │   ├── Header.jsx           # Header with dark mode toggle
+│   │   ├── ShoppingList.jsx     # List container with filtering logic
+│   │   ├── ItemForm.jsx         # Controlled form to add items
+│   │   ├── Filter.jsx           # Search and category filters
+│   │   └── Item.jsx             # Individual item with cart toggle
+│   ├── data/
+│   │   └── items.js             # Initial shopping list data
+│   ├── index.css                # Global styles
+│   └── main.jsx                 # App entry point
+├── package.json
+└── README.md
+```
 
-### ItemForm
+## Component Architecture
 
-There is a new component called `ItemForm` that will allow us to add new items
-to our shopping list. _When the form is submitted_, a new item should be created
-and added to our list of items.
+### Data Flow
+```
+App (manages items array)
+└── ShoppingList (manages filters: search, category)
+    ├── ItemForm (controlled form for new items)
+    ├── Filter (controlled search input + category select)
+    └── Item (individual item with cart state)
+```
 
-- Make all the input fields for this form controlled inputs, so that you can
-  access all the form data via state. When setting the initial state for the
-  `<select>` tag, use an initial value of "Produce" (since that's the first
-  option in the list).
+### State Management
 
-- Handle the form's _submit_ event, and use the data that you have saved in
-  state to create a new item object with the following properties:
+**App.jsx:**
+- `items` - Array of all shopping list items
+- `isDarkMode` - Boolean for theme toggle
 
-  ```jsx
-  const newItem = {
-    id: uuid(), // the `uuid` library can be used to generate a unique id
-    name: itemName,
-    category: itemCategory,
-  };
-  ```
+**ShoppingList.jsx:**
+- `search` - String for search filter
+- `selectedCategory` - String for category filter
 
-- Add the new item to the list by updating state. To get the test passing,
-  you'll need to use a prop called `onItemFormSubmit` as a callback and pass the
-  new item to it.
+**ItemForm.jsx:**
+- `name` - String for item name input
+- `category` - String for category select
 
-  **NOTE**: to add a new element to an array in state, it's a good idea to use
-  the spread operator:
+**Item.jsx:**
+- `isInCart` - Boolean for cart status
 
-  ```jsx
-  function addElement(element) {
-    setArray([...array, element]);
+## Key Concepts Demonstrated
+
+### 1. Controlled Components
+
+All form inputs are controlled, meaning their values are stored in state:
+```jsx
+function ItemForm({ onItemFormSubmit }) {
+  const [name, setName] = useState("");
+  const [category, setCategory] = useState("Produce");
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input 
+        value={name}                    // Controlled by state
+        onChange={(e) => setName(e.target.value)}
+      />
+      <select 
+        value={category}                // Controlled by state
+        onChange={(e) => setCategory(e.target.value)}
+      >
+        {/* options */}
+      </select>
+    </form>
+  );
+}
+```
+
+### 2. State Lifting
+
+Search state lives in `ShoppingList` because both `Filter` and the item list need it:
+```jsx
+function ShoppingList({ items }) {
+  const [search, setSearch] = useState("");
+
+  return (
+    <>
+      <Filter search={search} onSearchChange={setSearch} />
+      {/* Filtered items based on search */}
+    </>
+  );
+}
+```
+
+### 3. Multiple Filters
+
+Items are filtered by both category AND search text:
+```jsx
+const itemsToDisplay = items.filter((item) => {
+  // Filter by category
+  if (selectedCategory !== "All" && item.category !== selectedCategory) {
+    return false;
   }
-  ```
 
-  The spread operator allows us to copy all the old values of an array into a
-  new array, and then add new elements as well. When you're working with state,
-  it's important to pass a _new_ array to the state setter function instead of
-  mutating the original array.
+  // Filter by search text
+  if (search !== "" && !item.name.toLowerCase().includes(search.toLowerCase())) {
+    return false;
+  }
 
-## Resources
+  return true;
+});
+```
 
-- [React Forms](https://facebook.github.io/react/docs/forms.html)
+### 4. Adding Items with Spread Operator
+
+New items are added without mutating the original array:
+```jsx
+function handleItemFormSubmit(newItem) {
+  setItems([...items, newItem]);  // Creates new array
+}
+```
+
+### 5. Form Submission
+
+Prevent default form behavior and handle data in React:
+```jsx
+function handleSubmit(event) {
+  event.preventDefault();  // Prevent page reload
+  
+  const newItem = {
+    id: uuid(),
+    name: name,
+    category: category,
+  };
+  
+  onItemFormSubmit(newItem);  // Pass to parent
+  
+  // Reset form
+  setName("");
+  setCategory("Produce");
+}
+```
+
+## Features Breakdown
+
+### Search Filter
+- Real-time filtering as user types
+- Case-insensitive search
+- Searches item names
+
+### Category Filter
+- Dropdown to filter by category
+- Options: All, Produce, Dairy, Dessert
+- Works alongside search filter
+
+### Add New Items
+- Controlled form inputs
+- Validation through required fields
+- Unique ID generation with UUID
+- Form resets after submission
+
+### Cart Toggle
+- Each item can be added/removed from cart
+- Visual indication with styling
+- Local state per item
+
+### Dark Mode
+- Toggle between light and dark themes
+- Persists across interactions
+- Applied via CSS classes
+
+## Testing
+
+All tests passing:
+- Controlled search input
+- Search filtering functionality
+- Controlled form inputs
+- Form submission creates new items
+- New items appear in list
+
+Run tests:
+```bash
+npm test
+```
+
+## Lab Requirements Completed
+
+### Filter Component
+- Search input is a controlled component
+- State for search text added to appropriate component
+- Search text filters displayed items
+- Uses `onSearchChange` callback prop
+
+### ItemForm Component
+- All inputs are controlled components
+- Initial category state set to "Produce"
+- Form submission prevented from default behavior
+- New item created with uuid, name, and category
+- Uses `onItemFormSubmit` callback prop
+- Items added using spread operator (no mutation)
+
+## Usage Examples
+
+### Adding an Item
+1. Type item name in "Name" field
+2. Select category from dropdown
+3. Click "Add to List"
+4. Item appears in the list
+
+### Searching Items
+1. Type in search box
+2. List filters in real-time
+3. Case-insensitive matching
+
+### Filtering by Category
+1. Select category from dropdown
+2. List shows only items in that category
+3. Select "All" to show everything
+
+### Combining Filters
+1. Select a category
+2. Type in search box
+3. Items must match BOTH filters
+
+## Author
+
+**Shobinn Clark** - Full-Stack Software Engineering Student at Flatiron School
+
+- GitHub: [@shobinn24](https://github.com/shobinn24)
+
+## Learning Outcomes
+
+This project demonstrates:
+- Controlled components in React
+- Form handling with preventDefault
+- State management with useState
+- Props and callbacks for communication
+- Array filtering with multiple criteria
+- Lifting state to appropriate components
+- Immutable state updates with spread operator
+- Component composition and reusability
+- Event handling patterns
+
+## License
+
+This project was created as part of the Flatiron School Full-Stack Software Engineering curriculum.
+
+## Acknowledgments
+
+- Flatiron School for project requirements and test suite
+- React documentation for best practices
